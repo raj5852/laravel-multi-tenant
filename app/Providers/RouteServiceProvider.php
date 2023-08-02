@@ -37,7 +37,7 @@ class RouteServiceProvider extends ServiceProvider
         //         ->group(base_path('routes/web.php'));
         // });
 
-        // $this->configureRateLimiting();
+        $this->configureRateLimiting();
 
         $this->routes(function () {
             $this->mapApiRoutes();
@@ -67,8 +67,17 @@ protected function mapApiRoutes()
     }
 }
 
-protected function centralDomains(): array
-{
-    return config('tenancy.central_domains');
-}
+    protected function centralDomains(): array
+    {
+        return config('tenancy.central_domains');
+    }
+
+    protected function configureRateLimiting()
+    {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+        });
+    }
+
+
 }
